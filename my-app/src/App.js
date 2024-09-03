@@ -2,6 +2,10 @@ import React, {useState} from "react";
 import './styles/App.css';
 import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
+import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/MyModal/MyModal";
+import MyButton from "./components/UI/button/MyButton";
+import {usePosts} from "./hooks/usePosts";
 
 function App() {
     const [posts, setPosts] = useState([
@@ -9,9 +13,13 @@ function App() {
         {id: 2, title: 'JavaScript 2', body: 'Description'},
         {id: 3, title: 'JavaScript 3', body: 'Description'}
     ]);
+    const [filter, setFilter] = useState({sort: '', query: ''});
+    const [modal, setModal] = useState(false);
+    const  sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
     function createPost(newPost) {
         setPosts( [...posts, newPost]);
+        setModal(false);
     }
 
     // получаем пост из дочернего
@@ -21,11 +29,17 @@ function App() {
 
     return (
         <div className="App">
-            <PostForm create={createPost}/>
-            {posts.length !== 0
-                ? <PostList remove={removePost} posts={posts} title= "Посты JS"/>
-                : <h1>Посты не найдены!</h1>
-            }
+            <MyButton onClick={() => setModal(true)}>
+                Создать пост
+            </MyButton>
+            <MyModal visible={modal} setVisible={setModal}>
+                <PostForm create={createPost}/>
+            </MyModal>
+            <PostFilter
+                filter={filter}
+                setFilter={setFilter}
+            />
+            <PostList remove={removePost} posts={sortedAndSearchedPosts} title= "Посты JS"/>
         </div>
     );
 }
